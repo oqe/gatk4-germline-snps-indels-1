@@ -18,6 +18,8 @@ process GATK_SORT_AND_FIX_TAGS {
     path(ref_fasta)
     path(ref_fasta_fai)
 
+    path(tmp_dir)
+
     output:
     tuple val(sampleId),
             path("${sampleId}.mapped.merged.duplicate_marked.sorted.bam"),
@@ -37,6 +39,7 @@ process GATK_SORT_AND_FIX_TAGS {
         --SORT_ORDER "coordinate" \
         --CREATE_INDEX false \
         --CREATE_MD5_FILE false \
+        --TMP_DIR ${tmp_dir} \
     | \
     ${params.gatk_path} --java-options "-Dsamjdk.compression_level=${params.compression_level} ${params.java_opts_fix}" \
     SetNmMdAndUqTags \
@@ -44,7 +47,8 @@ process GATK_SORT_AND_FIX_TAGS {
         --OUTPUT ${sampleId}.mapped.merged.duplicate_marked.sorted.bam \
         --CREATE_INDEX true \
         --CREATE_MD5_FILE true \
-        --REFERENCE_SEQUENCE ${ref_fasta}
+        --REFERENCE_SEQUENCE ${ref_fasta} \
+        --TMP_DIR ${tmp_dir}
     """
 
 

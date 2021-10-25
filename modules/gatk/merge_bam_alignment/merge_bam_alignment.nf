@@ -11,6 +11,7 @@ process GATK_MERGE_BAM_ALIGNMENT {
     input:
 
     val(sampleId)
+    val(lane)
     path(input_mapped_bam)
     path(input_unmapped_bam)
 
@@ -21,8 +22,7 @@ process GATK_MERGE_BAM_ALIGNMENT {
     val(bwa_version)
 
     output:
-    val(sampleId)
-    path("${sampleId}.mapped.merged.bam")
+    tuple val(sampleId), val(lane), path("${sampleId}.${lane}.mapped.merged.bam")
 
     script:
     bwa_commandline = "bwa mem -K 100000000 -p -v 3 -t 8 -Y ${ref_fasta}"
@@ -35,7 +35,7 @@ process GATK_MERGE_BAM_ALIGNMENT {
                         --ATTRIBUTES_TO_RETAIN X0 \
                         --ALIGNED_BAM ${input_mapped_bam} \
                         --UNMAPPED_BAM ${input_unmapped_bam} \
-                        --OUTPUT ${sampleId}.mapped.merged.bam \
+                        --OUTPUT ${sampleId}.${lane}.mapped.merged.bam \
                         --REFERENCE_SEQUENCE ${ref_fasta} \
                         --PAIRED_RUN true \
                         --SORT_ORDER "unsorted" \
@@ -57,6 +57,6 @@ process GATK_MERGE_BAM_ALIGNMENT {
 
     stub:
     """
-    touch ${sampleId}.mapped.merged.bam
+    touch ${sampleId}.${lane}.mapped.merged.bam
     """
 }

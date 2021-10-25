@@ -5,7 +5,8 @@ nextflow.enable.dsl = 2
 // Read and derive file names and location from the params
 //================================================================================
 
-unmapped_bams = file(params.unmapped_bams_list)
+// We want to use predefined files, we want to use files from previous workflow
+// unmapped_bams = file(params.unmapped_bams_list)
 ref_fasta = file(params.fasta)
 ref_alt = file("${params.fasta}.64.alt")
 ref_amb = file("${params.fasta}.64.amb")
@@ -15,6 +16,8 @@ ref_pac = file("${params.fasta}.64.pac")
 ref_sa = file("${params.fasta}.64.sa")
 ref_fasta_fai = file("${params.fasta}.fai")
 ref_dict = file(params.fasta.replace(".fasta", ".dict"))
+
+tmp_dir = file(params.temp_dir)
 
 //================================================================================
 // Include modules and (soft) override module-level parameters
@@ -55,16 +58,27 @@ workflow PREPROCESSING_MAPPING {
             PICARD_SAM_TO_FASTQ_BWA_MEM.out[0],
             PICARD_SAM_TO_FASTQ_BWA_MEM.out[1],
             PICARD_SAM_TO_FASTQ_BWA_MEM.out[2],
+            PICARD_SAM_TO_FASTQ_BWA_MEM.out[3],
             ref_dict,
             ref_fasta,
             ref_fasta_fai,
             bwa_version
     )
+ 
+    //========================================================================
+    // Collect/gather all lane bam files per sample as input
+    //========================================================================
+    // .groupTuple (by: 0), groups to channel of sample, arrayList of lanes and lane files
 
+   GATK_MERGE_BAM_ALIGNMENT.out
+        .groupTuple( by:0 )
+        .set{ all_lanes_per_sample }
+
+        //.subscribe onNext: { println it }, onComplete: { println 'Done' }
 
     GATK_MARK_DUPLICATES(
-            GATK_MERGE_BAM_ALIGNMENT.out[0],
-            GATK_MERGE_BAM_ALIGNMENT.out[1]
+            //GATK_MERGE_BAM_ALIGNMENT.out.groupTuple( by:0 )
+            all_lanes_per_sample
     )
 
     GATK_SORT_AND_FIX_TAGS(
@@ -72,10 +86,11 @@ workflow PREPROCESSING_MAPPING {
             GATK_MARK_DUPLICATES.out[1],
             ref_dict,
             ref_fasta,
-            ref_fasta_fai
+            ref_fasta_fai,
+            tmp_dir
     )
 
     emit:
     GATK_SORT_AND_FIX_TAGS.out
-}
 
+}

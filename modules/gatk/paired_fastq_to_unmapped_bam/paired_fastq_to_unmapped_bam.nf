@@ -13,6 +13,7 @@ process GATK_PAIRED_FASTQ_TO_UNMAPPED_BAM {
             file(fastq_2),
             val(run_date),
             val(sample_name),
+            val(lane),
             val(library_name),
             val(platform_name),
             val(platform_unit),
@@ -20,7 +21,7 @@ process GATK_PAIRED_FASTQ_TO_UNMAPPED_BAM {
             val(sequencing_center)
 
     output:
-    tuple val(sample_name), path("${readgroup_name}.unmapped.bam")
+    tuple val(sample_name), val(lane), path("${readgroup_name}.${lane}.unmapped.bam")
 
     script:
     """
@@ -29,7 +30,7 @@ process GATK_PAIRED_FASTQ_TO_UNMAPPED_BAM {
                         FastqToSam \
                         --FASTQ ${fastq_1} \
                         --FASTQ2 ${fastq_2} \
-                        --OUTPUT ${readgroup_name}.unmapped.bam \
+                        --OUTPUT ${readgroup_name}.${lane}.unmapped.bam \
                         --READ_GROUP_NAME ${readgroup_name} \
                         --SAMPLE_NAME ${sample_name} \
                         --LIBRARY_NAME ${library_name} \
@@ -42,7 +43,7 @@ process GATK_PAIRED_FASTQ_TO_UNMAPPED_BAM {
     stub:
 
     """
-    touch ${readgroup_name}.unmapped.bam
+    touch ${readgroup_name}.${lane}.unmapped.bam
     """
 }
 

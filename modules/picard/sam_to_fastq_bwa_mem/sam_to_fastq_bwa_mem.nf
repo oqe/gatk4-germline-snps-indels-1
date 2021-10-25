@@ -12,7 +12,7 @@ process PICARD_SAM_TO_FASTQ_BWA_MEM {
     label "gitc_container"
 
     input:
-    tuple val(sampleId), path(input_unmapped_bam)
+    tuple val(sampleId), val(lane), path(input_unmapped_bam)
 
     path(ref_alt)
     path(ref_amb)
@@ -26,7 +26,8 @@ process PICARD_SAM_TO_FASTQ_BWA_MEM {
 
     output:
     val(sampleId)
-    path("${sampleId}.mapped.bam")
+    val(lane)
+    path("${sampleId}.${lane}.mapped.bam")
     path(input_unmapped_bam)
 
     script:
@@ -44,15 +45,15 @@ process PICARD_SAM_TO_FASTQ_BWA_MEM {
         NON_PF=true \
     | \
 		${params.bwa_path} mem \
-		 -K 100000000 -p -v 3 -t 16 -Y ${ref_fasta} /dev/stdin -  2> >(tee ${sampleId}.bwa.stderr.log >&2) \
+		 -K 100000000 -p -v 3 -t 16 -Y ${ref_fasta} /dev/stdin -  2> >(tee ${sampleId}.${lane}.bwa.stderr.log >&2) \
     | \
-		${params.samtools_path} view -1 - > ${sampleId}.mapped.bam
+		${params.samtools_path} view -1 - > ${sampleId}.${lane}.mapped.bam
     """
 
 
     stub:
 
     """
-    touch ${sampleId}.mapped.bam
+    touch ${sampleId}.${lane}.mapped.bam
     """
 }

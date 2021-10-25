@@ -9,8 +9,8 @@ process GATK_MARK_DUPLICATES {
     label 'gatk4_container'
 
     input:
-    val(sampleId)
-    path(input_mapped_merged_bam)
+    //tuple val(sampleId), tuple val(lanes), tuple path(input_mapped_merged_bams)
+    tuple val(sampleId), val(lanes), path(input_mapped_merged_bams)
 
     output:
     val(sampleId)
@@ -18,11 +18,13 @@ process GATK_MARK_DUPLICATES {
     path("${sampleId}_merged.deduped.metrics.txt")
 
     script:
+    def input_mapped_merged_bams2 = input_mapped_merged_bams.collect { "--INPUT $it " }.join(" ")
+    
 
     """
     ${params.gatk_path} --java-options "-Dsamjdk.compression_level=${params.compression_level} ${params.java_opts}" \
                         MarkDuplicates \
-                        --INPUT ${input_mapped_merged_bam} \
+                        ${input_mapped_merged_bams2} \
                         --OUTPUT ${sampleId}_merged.deduped.bam \
                         --METRICS_FILE ${sampleId}_merged.deduped.metrics.txt \
                         --VALIDATION_STRINGENCY SILENT \

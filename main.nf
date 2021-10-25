@@ -24,22 +24,33 @@ include { VARIANT_DISCOVERY } from "./workflows/variant_discovery/variant_discov
 
 // Convert input manifest to a channel.
 fastq_params_ch = channel.fromPath(fastq_files_list)
-        .splitText(keepHeader: false)
+        .splitText(keepHeader:true)
         .map { line ->
             cols = line.tokenize('\t')
             [
                     file(cols[2]), // fastq_1
                     file(cols[3]), // fastq_2
-                    cols[6], // run_date
+                    cols[7], // run_date
                     cols[1], // sample_name
+                    // NEW
+                    cols[4], // lane
+                    cols[5], // library_name
+                    cols[8], // platform_name
+                    cols[6], // platform_unit
+                    cols[0], // readgroup_name
+                    cols[9] // sequencing_center
+
+                    // OLD 
+                    /*
                     cols[4], // library_name
                     cols[7], // platform_name
                     cols[5], // platform_name
                     cols[0], // readgroup_name
                     cols[8] // sequencing_center
-
+                    */
             ]
         }
+
 
 //================================================================================
 // Main workflow
@@ -61,6 +72,6 @@ workflow {
             }
             .collectFile(
                     name: 'merged_vcfs.tsv', newLine: true, storeDir: "${params.outdir}"
-            )
-}
+            ) 
 
+}
