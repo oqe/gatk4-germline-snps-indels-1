@@ -17,16 +17,16 @@ Multi-lane support will be added similarly as [WARP pipelines - Exome Germline S
 
 
 ## TO-DO, Features to add
-- [] Write local+singularity example for exome sequencing data in this README.md
-    - [] Make full instructions with IGSR/1000genomes exome data as example
-        - [] special note on creating scattered interval lists from your target interval list
-        - [] give examples of channel handling with printed outputs
-        - [] string & array handling in process with groovy-lang
-- [] Update used containers
-    - [] test
-- [] Test with SLURM
-    - [] Write documentation
-- [] Joint-calling?
+- [ ] Write local+singularity example for exome sequencing data in this README.md
+    - [ ] Make full instructions with IGSR/1000genomes exome data as example
+        - [ ] special note on creating scattered interval lists from your target interval list
+        - [ ] give examples of channel handling with printed outputs
+        - [ ] string & array handling in process with groovy-lang
+- [ ] Update used containers
+    - [ ] test
+- [ ] Test with SLURM
+    - [ ] Write documentation
+- [ ] Joint-calling?
 - [x] multi-lane fastq support
     + [x] modify input file table, fofn format
         - [x] add lane column to fofn sample table file (one sample can have multiple lanes, one lane per input (fofn) table line)
