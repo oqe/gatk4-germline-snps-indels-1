@@ -1,17 +1,25 @@
 # Fork of gatk4-germline-snps-indels
 Fork of gatk4-germline-snps-indels. Reason for fork is to add multi-lane (undefined amount) support per single sample.
 
-Multi-lane support will be added similarly as [WARP pipelines - Exome Germline Single Sample Overview](https://broadinstitute.github.io/warp/docs/Pipelines/Exome_Germline_Single_Sample_Pipeline/README/) does it. Paired-end fastq files per lane will obviously be processed in pairs and are converted to unaligned BAM (workflow FORMAT_CONVERSION with GATK_PAIRED_FASTQ_TO_UNMAPPED_BAM module). Further more (lane specific) sample files are processed in workflow PREPROCESSING_MAPPING (modules PICARD_SAM_TO_FASTQ_BWA_MEM, BWA_GET_BWA_VERSION, GATK_MERGE_BAM_ALIGNMENT, GATK_MERGE_BAM_ALIGNMENT) up to (workflow PREPROCESSING_MAPPING) module GATK_MARK_DUPLICATES. Then in this process MarkDuplicates, all lane files per sample are combined as in the Broad Institute's WARP pipelines.
+Multi-lane support is added similarly as [WARP pipelines - Exome Germline Single Sample Overview](https://broadinstitute.github.io/warp/docs/Pipelines/Exome_Germline_Single_Sample_Pipeline/README/) does it. 
+- Paired-end fastq files per lane are processed in pairs and are converted to unaligned BAM (as before)
+    + workflow FORMAT_CONVERSION with GATK_PAIRED_FASTQ_TO_UNMAPPED_BAM module). 
+- Further more (lane specific) sample files are processed
+    + workflow PREPROCESSING_MAPPING
+        - modules PICARD_SAM_TO_FASTQ_BWA_MEM, BWA_GET_BWA_VERSION, GATK_MERGE_BAM_ALIGNMENT, GATK_MERGE_BAM_ALIGNMENT) 
+- In workflow PREPROCESSING_MAPPING module GATK_MARK_DUPLICATES, process MarkDuplicates, all lane files per sample are combined as in the Broad Institute's WARP pipelines
 
 
-## Changes done
-+ input_fofn (variable in params file) format is changed
+## Changes done (dev branch)
++ **input_fofn** (variable in params file) format is changed
     - lane column is added, headers now are: 
-    readgroup_name  sample_name fastq_1 fastq_2 lane    library_name    platform_unit   run_date    platform_name   sequencing_center
-+ GATK_MERGE_BAM_ALIGNMENT.out channel is edited by combining all lane and lane file information under same sample by groupTuple()
-+ GATK_MARK_DUPLICATES module/mark_duplicates.nf process script is edited to add prefix (--INPUT, and suffix space), so that multiple bam files each have the form "--INPUT bam1 --INPUT bam2" etc.
+
+        readgroup_name  sample_name fastq_1 fastq_2 lane    library_name    platform_unit   run_date    platform_name   sequencing_center
+
++ **GATK_MERGE_BAM_ALIGNMENT.out channel** is edited by combining all lane and lane file information under same sample by groupTuple()
++ **GATK_MARK_DUPLICATES module/mark_duplicates.nf** process script is edited to add prefix (--INPUT, and suffix space), so that multiple bam files each have the form "--INPUT bam1 --INPUT bam2" etc.
 + all workflow processess prior to GATK_MARK_DUPLICATES have input value lane or lanes added as well as in output value(s)
-+ tmp_dir variable is added to params.yaml as user defined path
++ **tmp_dir** variable is added to params.yaml as user defined path
     - this is specific to GATK_SORT_AND_FIX_TAGS module/process in preprocessing_mapping.nf workflow
     - when executing GATK_SORT_AND_FIX_TAGS process in local setting the server/machine /tmp runs out of space, --TMP_DIR parametre is added to gatk SortSam and SetNmMdAndUqTags commands
 
@@ -19,13 +27,15 @@ Multi-lane support will be added similarly as [WARP pipelines - Exome Germline S
 ## TO-DO, Features to add
 - [ ] Write local+singularity example for exome sequencing data in this README.md
     - [ ] Make full instructions with IGSR/1000genomes exome data as example
-        - [ ] special note on creating scattered interval lists from your target interval list
+        - [ ] special note on creating scattered interval lists from your target interval list + inconsistancies
         - [ ] give examples of channel handling with printed outputs
         - [ ] string & array handling in process with groovy-lang
 - [ ] Update used containers
     - [ ] test
 - [ ] Test with SLURM
     - [ ] Write documentation
+- [ ] Test with T2T v1.1 genome assembly
+- [ ] Test with GRCh37 genome assembly
 - [ ] Joint-calling?
 - [x] multi-lane fastq support
     + [x] modify input file table, fofn format
