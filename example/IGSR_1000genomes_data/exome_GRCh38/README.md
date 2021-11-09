@@ -2,28 +2,28 @@
 
 This document describes utilization of this workflow on **exome** example data downloaded from IGSR/1000 Genomes using reference genome version **GRCh38**.
 
-## Download git repository
+## 1. Download data
+### 1.1. Download git repository
 
 Download git repository
 
 	git clone 
 
 
-## Download human genome reference GRCh38/HG38
+### 1.2. Download human genome reference GRCh38/HG38
 
 Download human genome reference GRCh38/HG38 bundle.
 
 Read more:
-- [https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle](Download human genome reference GRCh38/HG38)
+- [Download human genome reference GRCh38/HG38](https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle)
 
-## Select sample(s)
+### 1.3. Select sample(s)
 
 Browse and select wanted sample(s) from the IGSR [data portal](https://www.internationalgenome.org/data-portal/sample)
 
 In this example we will choose sample **HG00188**.
 
-## Download sequencing data for sample HG00188
-### Raw sequencing data - FASTQ files
+### 1.4. Download sequencing data for sample HG00188 - Raw sequencing data / FASTQ files
 
 We have selected sample HG00188 from IGSR data portal.
 
@@ -42,11 +42,11 @@ Using linux terminal let's download the samples:
 Read more:
 - [About FASTQ sequence read files](https://www.internationalgenome.org/faq/about-fastq-sequence-read-files/)
 
-### Exome / Exon targetted intervals
+### 1.5. Exome / Exon targetted intervals
 
 Since we are going to analyze exome sequencing data which is targeted data to specific intervals in the genome, we need those target/bait intervals for our analysis.
 
-Let's check the [FAQ](https://www.internationalgenome.org/faq)
+Let's check the IGSR [FAQ](https://www.internationalgenome.org/faq)
 - [How was exome and exon targetted sequencing used?](https://www.internationalgenome.org/faq/how-was-exome-and-exon-targetted-sequencing-used/)
 
 Download the provided targets.
@@ -59,7 +59,7 @@ Download the provided targets.
 
 Unfortunately 20130108.exome.targets.bed.README says the target intervals are in GRCh37 reference genome version coordinates. We want GRCh38 reference genome version. One option would be to use liftOver-tool to lift over the GRCh37 to GRCh38. Let's continue to dig around.
 
-#### Search for GRCh38 exome target coordinates
+#### 1.5.1. Search for GRCh38 exome target coordinates
 
 Let's check the articles related to IGSR and the 1000 Genomes Project [here](https://www.internationalgenome.org/about). Read the [IGSR’s Nucleic Acids Research publication](https://academic.oup.com/nar/article/48/D1/D941/5580898)
 
@@ -80,7 +80,7 @@ Let's download the files from the ftp-link:
 
 File **20190125_exon_coord_README.txt** says that this interval file is a result of actual liftOver of GRCh37 version. Well, alright, let's use this new interval file anyway.
 
-### Search for additional information
+### 1.6. Search for additional information
 
 We need some extra information to do the analysis.
 
@@ -108,7 +108,7 @@ Download
 	cd ..
 	wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/1000genomes.sequence.index
 
-It's basically a big table, let's read it into R select only relevant information for us:
+It's basically a big table, let's read it into R and select only relevant information for us:
 
 ```r
 IGSR_seq <- read.csv(
@@ -124,7 +124,7 @@ IGSR_seq <- read.csv(
 #install.packages("dplyr")
 library(dplyr)
 
-# Let's filter only our sample
+# Let's filter by our sample and partial filenames
 specific_samples <- IGSR_seq %>% 
   filter(SAMPLE_NAME == "HG00188") %>%
   filter(grepl('SRR070/SRR070504/SRR070504',`X.FASTQ_ENA_PATH`) | 
@@ -154,11 +154,11 @@ Inspect the table by filenames SRR070504/SRR070504 ... and SRR070795/SRR070795.
 Read more here:
 - [https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups](https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups)
 
-## Prepare main sample information containing input file for analysis
+## 2. Prepare main sample information containing input file for analysis
 
 Next we need to input your sample data to a text file where values are separted by tab. Information needs to placed in the following order.
 
-readgroup_name | sample_name | fastq_1 | fastq_2 | lane | library_name | platform_unit | run_date | platform_name | sequencing_center
+| readgroup_name | sample_name | fastq_1 | fastq_2 | lane | library_name | platform_unit | run_date | platform_name | sequencing_center |
 
 Read more about different fields here:
 - [https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups](https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups)
@@ -175,7 +175,7 @@ From our previous section with we select appropriate information from 1000genome
 
 **library_name** let's use the LIBRARY_NAME values. 2862178100 for both, so the different sequencing runs are from the same library prepration.
 
-**platform_unit** is kind of tricky. We can check from our FASTQ-files if they have any usbale information:
+**platform_unit** is kind of tricky. We can check from our FASTQ-files if they have any usabale information:
 
 	zcat <path_to_your_file>/samples/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070504/SRR070504_1.fastq.gz | head
 
@@ -194,7 +194,7 @@ Here you can read about FASTQ-format:
 - [https://help.basespace.illumina.com/articles/descriptive/fastq-files/](https://help.basespace.illumina.com/articles/descriptive/fastq-files/)
 - [https://en.wikipedia.org/wiki/FASTQ_format](https://en.wikipedia.org/wiki/FASTQ_format)
 
-First part @@SRR070504 is SRA accession ID, .<number> is likely a read number.  
+First part @SRR070504 is SRA accession ID, number after "." is likely a read number.  
 HWUSI-EAS729_104869904 is likely combination of unique instrument name (HWUSI-EAS729) with flowcell barcode/name (104869904).  
 Next after : , we have flowcell lane, 8.
 Next tile number within the flowcell.
@@ -218,12 +218,12 @@ Let's compile our table
 
 readgroup_name | sample_name | fastq_1 | fastq_2 | lane | library_name | platform_unit | run_date | platform_name | sequencing_center
 --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
-65845 | HG00188 | /research/groups/paananen/projects/reference_genome_project/data/IGSR_1000genomes/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070504/SRR070504_1.fastq.gz | /research/groups/paananen/projects/reference_genome_project/data/IGSR_1000genomes/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070504/SRR070504_2.fastq.gz | SRR070504 | 2862178100 | HWUSI-EAS729_104869904:8 | 2010-10-28 | ILLUMINA | WUGSC
-65853 | HG00188 | /research/groups/paananen/projects/reference_genome_project/data/IGSR_1000genomes/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070795/SRR070795_1.fastq.gz | /research/groups/paananen/projects/reference_genome_project/data/IGSR_1000genomes/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070795/SRR070795_2.fastq.gz | SRR070795 | 2862178100 | HWUSI-EAS729_104869904:7 | 2010-10-28 | ILLUMINA | WUGSC
+65845 | HG00188 | path_to_my_files/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070504/SRR070504_1.fastq.gz | path_to_my_files/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070504/SRR070504_2.fastq.gz | SRR070504 | 2862178100 | HWUSI-EAS729_104869904:8 | 2010-10-28 | ILLUMINA | WUGSC
+65853 | HG00188 | ppath_to_my_files/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070795/SRR070795_1.fastq.gz | path_to_my_files/HG00188/ftp.sra.ebi.ac.uk/vol1/fastq/SRR070/SRR070795/SRR070795_2.fastq.gz | SRR070795 | 2862178100 | HWUSI-EAS729_104869904:7 | 2010-10-28 | ILLUMINA | WUGSC
 
 Save file as tab separated text file. (Note! above table is formatted to markdown (github)).
 
-Let's automate this in R as far as we can.
+Let's automate the previous steps a little bit in R as far as we can.
 
 ```r
 # select specific columns in specific order
@@ -244,7 +244,7 @@ write.table(selected_df, file = "<path_to_my_files>/manifest-1-sample.txt", quot
 
 Now you need to fill in the platform_unit column values and modify the actual FASTQ-file columns fastq_1, fastq_2.
 
-### Lanes or just a separate sequencing run with same library?
+### 2.1. Lanes or just a separate sequencing run with same library?
 
 As in the previous section we checked information for our sample per its' files/sequencing runs. It seems that the same sample library (identifcal library designation) was fully run multiple times. So the sample was simply sequenced in two separate occasions. When sample is split across lanes it might be to in case of one lane fails.
 
@@ -253,7 +253,7 @@ Lanes or not, I reckon that combining sequence data from same library source wou
 Read more here:
 - [https://gatk.broadinstitute.org/hc/en-us/articles/360035889471-How-should-I-pre-process-data-from-multiplexed-sequencing-and-multi-library-designs-](https://gatk.broadinstitute.org/hc/en-us/articles/360035889471-How-should-I-pre-process-data-from-multiplexed-sequencing-and-multi-library-designs-)
 
-### Convert bed to interval_list, scatter the interval_list to multiple files
+### 2.2. Convert bed to interval_list, scatter the interval_list to multiple files
 
 We need to convert our .bed formatted interval list file to interval_list format.
 
@@ -290,31 +290,32 @@ Generate .txt file with full paths of splitted interval list
 	cd output_1000G_Exome_scattered_intervals/
 	readlink -f 00* > ../scattered_20190125_coords_exon_targets.txt
 
-### Fill in your inputs to params.yaml
+### 2.3. Fill in your inputs to params.yaml
 
 **unmapped_bams_list:** - you can comment this out with #
 
-**input_fofn:** - table with sample information we assembled earlier, updated manifest-1-sample.txt.
-**outdir** - output directory where we want to save the end result(s).
-**scattered_calling_interval** - path to file that contains scattered interval paths. Same as in the previous section (scattered_20190125_coords_exon_targets.txt).
+**input_fofn:** - table with sample information we assembled earlier, updated manifest-1-sample.txt.  
+**outdir** - output directory where we want to save the end result(s).  
+**scattered_calling_interval** - path to file that contains scattered interval paths. Same as in the previous section (scattered_20190125_coords_exon_targets.txt).  
 
 Reference files:
-**fasta**
-**dbSNP_vcf:**
-**known_indels_mills:**
-**known_indels_dbSNP:**
-- fill in matching reference files you have downloaded.
-**sequence_grouping:**
-**sequence_grouping_unmapped:**
-- you can find sequence_grouping files from the repository (gatk4-germline-snps-indels-1/resources/original_public_sources/sequence_grouping ...")
+**fasta**  
+**dbSNP_vcf:**  
+**known_indels_mills:**  
+**known_indels_dbSNP:**  
+- fill in matching reference files you have downloaded.  
+**sequence_grouping:**  
+**sequence_grouping_unmapped:**  
+- you can find sequence_grouping files from the repository (gatk4-germline-snps-indels-1/resources/original_public_sources/sequence_grouping ...")  
 
 
-Additional input:
+Additional input:  
 **temp_dir:** - path to temporary folder, helps when executing locally or on a shared server.
 
-## Run analysis on local computer
+## 3. Run the workflow
+### 3.1. Run analysis on local computer
 
-Go to folder where you want the intermediate files to be stored or alternatively specify -workdir <your_chosen_path> argument for nextflow command.
+Go to folder where you want the intermediate files to be stored or alternatively specify -workdir <your_chosen_path> argument for nextflow command. Singularity is used in this example instead of docker.
 
 	nextflow run <path_to_my_files>/gatk4-germline-snps-indels-1/main.nf \
 	-params-file <path_to_my_files>/gatk4-germline-snps-indels-1/params.local.yaml 
@@ -323,7 +324,7 @@ Go to folder where you want the intermediate files to be stored or alternatively
 You can check the config for run options, such as limiting cpus or memory values for specific executors or profiles as in the for example local.
 
 
-## Run analysis on slurm cluster
+### 3.2. Run analysis on slurm cluster
 
 To run analysis on slurm cluster, login to slurm login-node. Singularity is used instead of docker. Then we just execute nextflow with slurm specific configuration options.
 
