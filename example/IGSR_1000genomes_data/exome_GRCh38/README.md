@@ -274,7 +274,7 @@ Further more we need to scatter the interval_list to multiple files for our work
 
 Unfortunately the scattered file names are renamed as .intervals which causes the gatk to error out. We need to rename the files to .interval_list. We also need to generate single file which has the paths of all the scattered .interval_list files.
 
-Create a small renaming script:
+Create a small renaming script: *[original](https://stackoverflow.com/questions/13227452/remove-multiple-extensions-from-all-files-in-a-directory-bash/13227731#13227731)*
 
 	cat #!/bin/bash \
 	for file in $(find . -name "*$1"); do \
