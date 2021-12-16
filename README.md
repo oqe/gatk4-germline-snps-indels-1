@@ -1,7 +1,7 @@
 # Fork of gatk4-germline-snps-indels
 Fork of gatk4-germline-snps-indels. Reason for fork is to add multi-lane (undefined amount) support per single sample.
 
-Multi-lane support is added similarly as [WARP pipelines - Exome Germline Single Sample Overview](https://broadinstitute.github.io/warp/docs/Pipelines/Exome_Germline_Single_Sample_Pipeline/README/) does it. MarkDuplicats process combines all lane files per sample.
+Multi-lane support is added similarly as [WARP pipelines - Exome Germline Single Sample Overview](https://broadinstitute.github.io/warp/docs/Pipelines/Exome_Germline_Single_Sample_Pipeline/README/) does it. MarkDuplicates process combines all lane files per sample.
 
 ## Changes done
 - added extensive [README.md](example/IGSR_1000genomes_data/exome_GRCh38/README.md) in example folder for analysis example (with data)
@@ -22,7 +22,7 @@ Multi-lane support is added similarly as [WARP pipelines - Exome Germline Single
 ## TO-DO:
 - [x] Write local+singularity example for exome sequencing data in this README.md
     - [x] Make full instructions with IGSR/1000genomes exome data as example
-        - [ ] special note on creating scattered interval lists from your target interval list + inconsistancies
+        - [x] special note on creating scattered interval lists from your target interval list + inconsistancies
         - [ ] give examples of channel handling with printed outputs
         - [ ] string & array handling in process with groovy-lang
 - [ ] Update used containers
@@ -30,8 +30,9 @@ Multi-lane support is added similarly as [WARP pipelines - Exome Germline Single
 - [x] Test with SLURM
     - [ ] Write documentation
 - [ ] Test with T2T v1.1 genome assembly
-- [ ] Test with GRCh37 genome assembly**?**
-- [ ] Joint-calling**?**
+- [ ] Test with GRCh37 genome assembly **?**
+- [ ] Joint-calling **?**
+- [ ] Add Sentieon support **?**
 - [x] multi-lane fastq support
     + [x] modify input file table, fofn format
         - [x] add lane column to fofn sample table file (one sample can have multiple lanes, one lane per input (fofn) table line)
